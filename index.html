@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank Account Management System</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #f1f3f6;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background: #004080;
+      color: white;
+      text-align: center;
+      padding: 1.2em;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: #e8eef7;
+      border-bottom: 2px solid #004080;
+    }
+
+    .tab {
+      background: transparent;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      background: #004080;
+      color: white;
+      border-radius: 5px 5px 0 0;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    input, button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #e82424;
+      font-size: 16px;
+    }
+
+    button {
+      background: #004080;
+      color: rgb(0, 0, 0);
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0055cc;
+    }
+
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background: #eef4ff;
+      border-left: 4px solid #004080;
+      border-radius: 5px;
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      padding: 10px;
+      background: #004080;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🏦 Bank Account Management System</h1>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab active" data-section="create">Create Account</button>
+      <button class="tab" data-section="deposit">Deposit</button>
+      <button class="tab" data-section="withdraw">Withdraw</button>
+      <button class="tab" data-section="transfer">Transfer</button>
+      <button class="tab" data-section="details">Account Details</button>
+      <button class="tab" data-section="history">Transaction History</button>
+    </div>
+
+    <section id="create" class="section active">
+      <h2>Create New Account</h2>
+      <input type="text" id="name" placeholder="Full Name">
+      <input type="text" id="type" placeholder="Account Type (Savings/Current)">
+      <input type="number" id="initial" placeholder="Initial Deposit">
+      <button onclick="createAccount()">Create Account</button>
+      <div id="create-result" class="result"></div>
+    </section>
+
+    <section id="deposit" class="section">
+      <h2>Deposit Money</h2>
+      <input type="number" id="dep-acc" placeholder="Account No">
+      <input type="number" id="dep-amt" placeholder="Amount">
+      <button onclick="depositMoney()">Deposit</button>
+      <div id="deposit-result" class="result"></div>
+    </section>
+
+    <section id="withdraw" class="section">
+      <h2>Withdraw Money</h2>
+      <input type="number" id="with-acc" placeholder="Account No">
+      <input type="number" id="with-amt" placeholder="Amount">
+      <button onclick="withdrawMoney()">Withdraw</button>
+      <div id="withdraw-result" class="result"></div>
+    </section>
+
+    <section id="transfer" class="section">
+      <h2>Transfer Money</h2>
+      <input type="number" id="from-acc" placeholder="Sender Account No">
+      <input type="number" id="to-acc" placeholder="Receiver Account No">
+      <input type="number" id="trans-amt" placeholder="Amount">
+      <button onclick="transferMoney()">Transfer</button>
+      <div id="transfer-result" class="result"></div>
+    </section>
+
+    <section id="details" class="section">
+      <h2>Account Details</h2>
+      <input type="number" id="det-acc" placeholder="Account No">
+      <button onclick="showDetails()">Show Details</button>
+      <div id="details-result" class="result"></div>
+    </section>
+
+    <section id="history" class="section">
+      <h2>Transaction History</h2>
+      <input type="number" id="hist-acc" placeholder="Account No">
+      <button onclick="showHistory()">Show History</button>
+      <div id="history-result" class="result"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Developed by <b>Suzal and Tanisha</b> | C++ Backend + HTML/CSS/JS Frontend</p>
+  </footer>
+
+  <script>
+    // --- Tab Switching ---
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.section).classList.add("active");
+      });
+    });
+
+    // --- Local Storage Simulation (Frontend-Only) ---
+    let accounts = {};
+    let transactions = {};
+
+    function createAccount() {
+      let name = document.getElementById("name").value.trim();
+      let type = document.getElementById("type").value.trim();
+      let initial = parseFloat(document.getElementById("initial").value);
+      let resultDiv = document.getElementById("create-result");
+
+      if (!name || !type || isNaN(initial) || initial < 0) {
+        showResult(resultDiv, "❌ Please fill all fields correctly.", false);
+        return;
+      }
+
+      let accNo = Math.floor(1000 + Math.random() * 9000);
+      accounts[accNo] = { name, type, balance: initial };
+      transactions[accNo] = [{ type: "create", amount: initial, remark: "Initial Deposit" }];
+      showResult(resultDiv, `✅ Account created! Account No: <b>${accNo}</b>`, true);
+    }
+
+    function depositMoney() {
+      let accNo = document.getElementById("dep-acc").value;
+      let amt = parseFloat(document.getElementById("dep-amt").value);
+      let resultDiv = document.getElementById("deposit-result");
+
+      if (!accounts[accNo]) return showResult(resultDiv, "❌ Account not found!", false);
+      if (isNaN(amt) || amt <= 0) return showResult(resultDiv, "❌ Invalid amount!", false);
+
+      accounts[accNo].balance += amt;
+      transactions[accNo].push({ type: "deposit", amount: amt });
+      showResult(resultDiv, `✅ Deposited ₹${amt} successfully.`, true);
+    }
+
+    function withdrawMoney() {
+      let accNo = document.getElementById("with-acc").value;
+      let amt = parseFloat(document.getElementById("with-amt").value);
+      let resultDiv = document.getElementById("withdraw-result");
+
+      if (!accounts[accNo]) return showResult(resultDiv, "❌ Account not found!", false);
+      if (amt > accounts[accNo].balance) return showResult(resultDiv, "❌ Insufficient balance!", false);
+
+      accounts[accNo].balance -= amt;
+      transactions[accNo].push({ type: "withdraw", amount: amt });
+      showResult(resultDiv, `✅ Withdrawn ₹${amt} successfully.`, true);
+    }
+
+    function transferMoney() {
+      let from = document.getElementById("from-acc").value;
+      let to = document.getElementById("to-acc").value;
+      let amt = parseFloat(document.getElementById("trans-amt").value);
+      let resultDiv = document.getElementById("transfer-result");
+
+      if (!accounts[from] || !accounts[to])
+        return showResult(resultDiv, "❌ Invalid account(s)!", false);
+      if (amt > accounts[from].balance)
+        return showResult(resultDiv, "❌ Insufficient balance!", false);
+
+      accounts[from].balance -= amt;
+      accounts[to].balance += amt;
+
+      transactions[from].push({ type: "transfer-out", amount: amt, remark: `To ${to}` });
+      transactions[to].push({ type: "transfer-in", amount: amt, remark: `From ${from}` });
+
+      showResult(resultDiv, `✅ Transferred ₹${amt} from ${from} to ${to}.`, true);
+    }
+
+    function showDetails() {
+      let accNo = document.getElementById("det-acc").value;
+      let resultDiv = document.getElementById("details-result");
+
+      if (!accounts[accNo]) return showResult(resultDiv, "❌ Account not found!", false);
+      let a = accounts[accNo];
+      showResult(resultDiv, `<b>Name:</b> ${a.name}<br><b>Type:</b> ${a.type}<br><b>Balance:</b> ₹${a.balance}`, true);
+    }
+
+    function showHistory() {
+      let accNo = document.getElementById("hist-acc").value;
+      let resultDiv = document.getElementById("history-result");
+
+      if (!transactions[accNo]) return showResult(resultDiv, "❌ No history found!", false);
+      let hist = transactions[accNo]
+        .map(t => `${t.type.toUpperCase()} - ₹${t.amount} ${t.remark ? "(" + t.remark + ")" : ""}`)
+        .join("<br>");
+      showResult(resultDiv, hist, true);
+    }
+
+    function showResult(div, msg, success) {
+      div.innerHTML = msg;
+      div.style.display = "block";
+      div.style.borderLeftColor = success ? "green" : "red";
+    }
+  </script>
+</body>
+</html>
