@@ -73,6 +73,7 @@ bank.exe
 Suzal Aggarwal
 
 B.Tech Computer Science Engineering Student
+📧 [suzalaggarwalll@gmail.com]
 
 ```
 ```
